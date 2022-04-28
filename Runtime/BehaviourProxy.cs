@@ -1,20 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-namespace Mabeee
+namespace BleGadget
 {
     internal class BehaviourProxy : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
-        {
+        private static BehaviourProxy s_instance;
 
+        private Action updateFunction;
+        private Action destroyFunction;
+
+        public static void Initialize(Action update,Action destroy)
+        {
+            if(s_instance == null)
+            {
+                var gmo = new GameObject("mabeeProxy");
+                GameObject.DontDestroyOnLoad(gmo);
+                s_instance = gmo.AddComponent<BehaviourProxy>();
+                s_instance.updateFunction = update;
+                s_instance.destroyFunction = destroy;
+            }
         }
 
-        // Update is called once per frame
-        void Update()
+        private void Update()
         {
+            if (this.updateFunction != null)
+            {
+                this.updateFunction();
+            }
+        }
+
+        void OnDestroy()
+        {
+            if (this.destroyFunction != null)
+            {
+                this.destroyFunction();
+            }
 
         }
     }
