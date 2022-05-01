@@ -8,7 +8,7 @@ namespace BleGadget
     {
         public static BleDeviceManager Instance { get; private set; } = new BleDeviceManager();
 
-        private Dictionary<string, MabeeeDevice> deviceDictionary;
+        private Dictionary<string, BleDevice> deviceDictionary;
 
         private BleDeviceManager() { }
 
@@ -20,12 +20,17 @@ namespace BleGadget
         private void OnInitialize()
         {
             Debug.Log("OnInitialize");
-
+            BehaviourProxy.Initialize(OnUpdate,OnFinalize);
         }
 
         private void OnInitializeFailed(string err)
         {
             Debug.LogError(err);
+        }
+
+        private void OnUpdate()
+        {
+
         }
 
         private void OnFinalize()
@@ -36,7 +41,7 @@ namespace BleGadget
         public void StartScan()
         {
             Debug.Log("StartScan");
-            toio.Ble.StartScan(new string[] { MabeeeDevice.ServiceUUID},
+            toio.Ble.StartScan(new string[] { BleDevice.ServiceUUID},
                 this.OnFindDevice);
         }
 
@@ -45,7 +50,7 @@ namespace BleGadget
             toio.Ble.StopScan();
         }
 
-        public void GetConnectableDevices(List<MabeeeDevice> devices)
+        public void GetConnectableDevices(List<BleDevice> devices)
         {
             devices.Clear();
             if (deviceDictionary == null) { return; }
@@ -55,12 +60,18 @@ namespace BleGadget
                 devices.Add(device);
             }
         }
-        public void GetConnectedDevices(List<MabeeeDevice> devices)
+        public void GetConnectedDevices(List<BleDevice> devices)
         {
-
+            devices.Clear();
+            if (deviceDictionary == null) { return; }
+            foreach (var device in deviceDictionary.Values)
+            {
+                if (!device.IsConnect) { continue; }
+                devices.Add(device);
+            }
         }
 
-        public void GetAllDevices(List<MabeeeDevice> devices)
+        public void GetAllDevices(List<BleDevice> devices)
         {
             devices.Clear();
             if(deviceDictionary == null) { return; }
@@ -75,11 +86,12 @@ namespace BleGadget
             //Debug.Log("OnFindDevice : " + addr + "::" + rssi);
             if(deviceDictionary == null)
             {
-                deviceDictionary = new Dictionary<string, MabeeeDevice>();
+                deviceDictionary = new Dictionary<string, BleDevice>();
             }
-            MabeeeDevice device;
+            BleDevice device;
             if(!deviceDictionary.TryGetValue(addr,out device) ){
-                device = new MabeeeDevice(this, addr);
+                device = new BleDevice();
+                device.Initialize(this, addr);
                 deviceDictionary.Add(addr, device);
             }
             device.OnFindDevice(service, rssi, data);
@@ -88,7 +100,7 @@ namespace BleGadget
         internal void OnConnectDevice(string addr)
         {
             Debug.Log("OnConnectDevice " + addr);
-            MabeeeDevice device;
+            BleDevice device;
             if (deviceDictionary.TryGetValue(addr, out device))
             {
                 device.IsConnect = true;
@@ -98,27 +110,30 @@ namespace BleGadget
         {
             Debug.Log("OnDiscoveredService " + addr +"::"+serviceUuid);
 
-            MabeeeDevice device;
+            BleDevice device;
             if (deviceDictionary.TryGetValue(addr, out device))
             {
+                device.OnDiscoverService(serviceUuid);
             }
         }
         internal void OnDiscoveredCharacteristic(string addr, string serviceUuid,string charastristicUuid)
         {
             Debug.Log("OnDiscoveredCharacteristic " + addr + "::" + serviceUuid + "::" + charastristicUuid);
-            MabeeeDevice device;
-            if (!deviceDictionary.TryGetValue(addr, out device))
+            BleDevice device;
+            if (deviceDictionary.TryGetValue(addr, out device))
             {
+                device.OnDiscoverCharastristic(serviceUuid,charastristicUuid);
             }
         }
         internal void OnDisconnect(string addr)
         {
-            Debug.Log("OnDisconnect " + addr);
-            MabeeeDevice device;
-            if (!deviceDictionary.TryGetValue(addr, out device))
+            BleDevice device;
+            if (deviceDictionary.TryGetValue(addr, out device))
             {
                 device.OnDisconnect();
             }
         }
+
+
     }
 }
