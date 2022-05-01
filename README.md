@@ -1,2 +1,4 @@
-# MabeeePluginForUnity
+# BleGadgetsPluginForUnity
 MabeeePluginForUnity
+
+## Mabeee
