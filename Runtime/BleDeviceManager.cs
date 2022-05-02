@@ -41,7 +41,7 @@ namespace BleGadget
         public void StartScan()
         {
             Debug.Log("StartScan");
-            toio.Ble.StartScan(new string[] { BleDevice.ServiceUUID},
+            toio.Ble.StartScan(DeviceBuilder.GetServices(),
                 this.OnFindDevice);
         }
 
@@ -50,34 +50,46 @@ namespace BleGadget
             toio.Ble.StopScan();
         }
 
-        public void GetConnectableDevices(List<BleDevice> devices)
+        public void GetConnectableDevices<T>(List<T> devices) where T : BleDevice
         {
             devices.Clear();
             if (deviceDictionary == null) { return; }
             foreach (var device in deviceDictionary.Values)
             {
                 if (device.IsConnect) { continue; }
-                devices.Add(device);
+                var obj = device as T;
+                if (obj != null)
+                {
+                    devices.Add(obj);
+                }
             }
         }
-        public void GetConnectedDevices(List<BleDevice> devices)
+        public void GetConnectedDevices<T>(List<T> devices) where T : BleDevice
         {
             devices.Clear();
             if (deviceDictionary == null) { return; }
             foreach (var device in deviceDictionary.Values)
             {
                 if (!device.IsConnect) { continue; }
-                devices.Add(device);
+                var obj = device as T;
+                if (obj != null)
+                {
+                    devices.Add(obj);
+                }
             }
         }
 
-        public void GetAllDevices(List<BleDevice> devices)
+        public void GetAllDevices<T>(List<T> devices) where T : BleDevice
         {
             devices.Clear();
             if(deviceDictionary == null) { return; }
             foreach (var device in deviceDictionary.Values)
             {
-                devices.Add(device);
+                var obj = device as T;
+                if (obj != null)
+                {
+                    devices.Add(obj);
+                }
             }
         }
 
@@ -90,9 +102,12 @@ namespace BleGadget
             }
             BleDevice device;
             if(!deviceDictionary.TryGetValue(addr,out device) ){
-                device = new BleDevice();
-                device.Initialize(this, addr);
-                deviceDictionary.Add(addr, device);
+                var builder = DeviceBuilder.GetBuilder(addr);
+                if (builder != null)
+                {
+                    device = builder(this, addr);
+                    deviceDictionary.Add(addr, device);
+                }
             }
             device.OnFindDevice(service, rssi, data);
         }
