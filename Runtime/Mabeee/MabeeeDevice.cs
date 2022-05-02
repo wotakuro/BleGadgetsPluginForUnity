@@ -8,10 +8,10 @@ namespace BleGadget
     public class MabeeeDevice : BleDevice
     {
         public static readonly string ServiceUUID = "B9F5FF00-D813-46C6-8B61-B453EE2C74D9";
-        public static readonly string pwmDutyUuid = "B9F53006-D813-46C6-8B61-B453EE2C74D9";
-        public static readonly string batteryDataUuid = "B9F51001-D813-46C6-8B61-B453EE2C74D9";
-        public static readonly string overCurrentUuid = "B9F51002-D813-46C6-8B61-B453EE2C74D9";
-        public static readonly string pioReadUuid = "B9F53003-D813-46C6-8B61-B453EE2C74D9";
+        private static readonly string pwmDutyUuid = "B9F53006-D813-46C6-8B61-B453EE2C74D9";
+        private static readonly string batteryDataUuid = "B9F51001-D813-46C6-8B61-B453EE2C74D9";
+        private static readonly string overCurrentUuid = "B9F51002-D813-46C6-8B61-B453EE2C74D9";
+        private static readonly string pioReadUuid = "B9F53003-D813-46C6-8B61-B453EE2C74D9";
 
         [RuntimeInitializeOnLoadMethod]
         public static void RegisterToBuilder()
@@ -19,7 +19,7 @@ namespace BleGadget
             DeviceBuilder.RegistBuilder(ServiceUUID ,(m,addr)=>new MabeeeDevice(m,addr) );
         }
 
-        private MabeeeDevice(BleDeviceManager m, string addr) : base(m, addr) { }
+        public MabeeeDevice(BleDeviceManager m, string addr) : base(m, addr) { }
 
         
 
@@ -27,12 +27,14 @@ namespace BleGadget
 
         protected override void OnReadData(string serviceUuid, string charastristicUuid, byte[] data)
         {
+            /*
             string str = ("OnReadData:" + serviceUuid + ":" + charastristicUuid + "\n");
             for (int i = 0; i < data.Length; ++i)
             {
                 str += data[i] + "::";
             }
             Debug.Log(str);
+            */
         }
 
         protected override void OnNotificateData(string serviceUuid, string charastristicUuid, byte[] data)
@@ -56,7 +58,7 @@ namespace BleGadget
                 {
                     return;
                 }
-                Debug.Log("Setoutput Power " + value);
+                //Debug.Log("Setoutput Power " + value);
                 buffer[0] = 1;
                 // value
                 buffer[1] = (byte)(value & 0xFF);
@@ -72,13 +74,13 @@ namespace BleGadget
             }
         }
 
-        public void UpdateBatteryData()
+        private void UpdateBatteryData()
         {
             buffer[0] = 0;
             WriteRequest(ServiceUUID, batteryDataUuid, buffer, 1);
         }
 
-        public void ReadRequests()
+        private void ReadRequests()
         {
             ReadRequest(ServiceUUID, pwmDutyUuid);
             ReadRequest(ServiceUUID, batteryDataUuid);

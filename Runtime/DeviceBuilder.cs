@@ -18,6 +18,7 @@ namespace BleGadget
 
         public static void RegistBuilder(string serviceUuid, BuildDeviceDelegate builder)
         {
+            serviceUuid = serviceUuid.ToUpper();
             if (s_builders.ContainsKey(serviceUuid))
             {
                 Debug.LogError("All ready exist service " + serviceUuid);
@@ -37,10 +38,11 @@ namespace BleGadget
             return array;
         }
 
-        public static BuildDeviceDelegate GetBuilder(string service)
+        public static BuildDeviceDelegate GetBuilder(string serviceUuid)
         {
+            serviceUuid = serviceUuid.ToUpper();
             BuildDeviceDelegate builder;
-            if(s_builders.TryGetValue(service,out builder))
+            if(s_builders.TryGetValue(serviceUuid, out builder))
             {
                 return builder;
             }

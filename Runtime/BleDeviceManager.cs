@@ -12,8 +12,12 @@ namespace BleGadget
 
         private BleDeviceManager() { }
 
-        public void Initialize()
+        private string currntService;
+        // serviceUUIDïKê{ÇÕâºé¿ëï(Å¶toioÇÃBLEé©ëÃÇè≠Çµâ¸ïœÇµÇ»Ç¢Ç∆ïúêîã@éÌëŒâûÇ≈Ç´Ç»Ç¢
+        public void Initialize(string serviceUuid)
         {
+            // [âºé¿ëï] serviceUUID
+            currntService = serviceUuid;
             toio.Ble.Initialize(OnInitialize, OnInitializeFailed);
         }
 
@@ -40,8 +44,9 @@ namespace BleGadget
 
         public void StartScan()
         {
-            Debug.Log("StartScan");
-            toio.Ble.StartScan(DeviceBuilder.GetServices(),
+
+            // [âºé¿ëï] serviceUUID
+            toio.Ble.StartScan( new string[] { currntService } /* DeviceBuilder.GetServices() */,
                 this.OnFindDevice);
         }
 
@@ -93,7 +98,7 @@ namespace BleGadget
             }
         }
 
-        private void OnFindDevice(string addr, string service, int rssi, byte[] data)
+        private void OnFindDevice(string addr, string name, int rssi, byte[] data)
         {
             //Debug.Log("OnFindDevice : " + addr + "::" + rssi);
             if(deviceDictionary == null)
@@ -102,14 +107,22 @@ namespace BleGadget
             }
             BleDevice device;
             if(!deviceDictionary.TryGetValue(addr,out device) ){
-                var builder = DeviceBuilder.GetBuilder(addr);
+                // [âºé¿ëï] serviceUUID
+                var builder = DeviceBuilder.GetBuilder(this.currntService);
                 if (builder != null)
                 {
                     device = builder(this, addr);
                     deviceDictionary.Add(addr, device);
                 }
+                else
+                {
+                    Debug.LogError("not Found Service " + name);
+                }
             }
-            device.OnFindDevice(service, rssi, data);
+            if (device != null)
+            {
+                device.OnFindDevice(name, rssi, data);
+            }
         }
 
         internal void OnConnectDevice(string addr)

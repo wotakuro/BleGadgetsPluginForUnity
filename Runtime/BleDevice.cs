@@ -24,7 +24,7 @@ namespace BleGadget
         }
         
 
-        public void OnFindDevice(string service, int rssi, byte[] data)
+        public void OnFindDevice(string name, int rssi, byte[] data)
         {
             this.Rssi = rssi;
             this.lastRssiUpdatedAt = Time.timeAsDouble;
