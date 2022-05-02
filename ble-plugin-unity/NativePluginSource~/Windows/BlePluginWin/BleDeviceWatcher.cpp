@@ -19,6 +19,10 @@ BleDeviceWatcher::DeviceInfo::DeviceInfo(const BleDeviceWatcher::DeviceInfo& src
 	//name(src.name),
 	addr(src.addr),rssi(src.rssi),lastFound(src.lastFound)
 {
+	this->serviceUuids.clear();
+	for (auto it = src.serviceUuids.begin(); it != src.serviceUuids.end(); ++it) {
+		this->serviceUuids.push_back(*it);
+	}
 }
 
 
@@ -31,6 +35,12 @@ const BleDeviceWatcher::DeviceInfo &
 	this->addr = src.addr;
 	this->rssi = src.rssi;
 	this->lastFound = src.lastFound;
+
+	this->serviceUuids.clear();
+	for (auto it = src.serviceUuids.begin(); it != src.serviceUuids.end(); ++it) {
+		this->serviceUuids.push_back(*it);
+	}
+
 	return *this;
 }
 
@@ -120,6 +130,7 @@ int BleDeviceWatcher::GetServiceNum(int idx)const {
 	if (idx < 0 || idx >= m_cacheData.size()) {
 		return 0;
 	}
+	auto data = m_cacheData.at(idx);
 	return m_cacheData.at(idx).serviceUuids.size();
 }
 
@@ -185,10 +196,10 @@ void BleDeviceWatcher::OnReceive(
 		deviceInfo.ClearServiceUuid();
 		// service uuidのセット
 		auto services = advertisement.ServiceUuids();
-		for (int i = 0; i < services.Size(); ++i) {
+		int serviceSize = services.Size();
+		for (int i = 0; i < serviceSize; ++i) {
 			deviceInfo.AppendServiceUuid( services.GetAt(i) );
 		}
-
         m_DeviceMap.emplace(addr, deviceInfo);
     }
     else {

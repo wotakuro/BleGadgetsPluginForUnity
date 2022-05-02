@@ -193,6 +193,23 @@ namespace toio.Windows
             return _BlePluginScanGetDeviceRssi(idx);
         }
 
+        [DllImport(pluginName)]
+        private static extern int _BlePluginScanGetDeviceServiceCount(int idx);
+
+        public static int ScanGetDeviceServiceCount(int idx)
+        {
+            return _BlePluginScanGetDeviceServiceCount(idx);
+        }
+
+        [DllImport(pluginName)]
+        private static extern IntPtr _BlePluginScanGetDeviceServiceUuid(int idx, int serviceIdx);
+
+        public static UuidHandler ScanGetDeviceServiceUuid(int idx,int serviceIdx)
+        {
+            var ptr = _BlePluginScanGetDeviceServiceUuid(idx, serviceIdx);
+            return new UuidHandler(ptr);
+        }
+
         // Connect Dissconnect
         [DllImport(pluginName)]
         private static extern IntPtr _BlePluginConnectDevice(ulong addr);

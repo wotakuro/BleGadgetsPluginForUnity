@@ -2,7 +2,6 @@
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
 
-
 using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
@@ -246,6 +245,17 @@ namespace toio.Windows
                 var name = "";// DllInterface.ScanGetDeviceName(i);
                 //Debug.Log("UpdateScanDeviceEvents name " + name);
                 var rssi = DllInterface.ScanGetDeviceRssi(i);
+
+
+                var num = DllInterface.ScanGetDeviceServiceCount(i);
+                string serviceStr = "Services " + num;
+                for (int j = 0; j< num; ++j)
+                {
+                    var uuid = DllInterface.ScanGetDeviceServiceUuid(i, j);
+                    serviceStr += "\n" + UuidDatabase.GetUuidStr(uuid);
+                }
+                UnityEngine.Debug.Log(serviceStr);
+
                 //Debug.Log("UpdateScanDeviceEvents rssi " + rssi);
                 if (s_discoverAction != null)
                 {

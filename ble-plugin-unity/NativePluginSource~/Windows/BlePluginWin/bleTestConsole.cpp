@@ -31,8 +31,9 @@ void ButtonSetSubscrive(uint64_t addr) {
 
 void TestRun(){
     auto uuidMgr = BlePlugin::UuidManager::GetInstance();
-    void* gattUUID = _BlePluginGetOrCreateUuidObject(0x10B20100U,
-        0x5B3B4571U, 0x9508cf3eU, 0xfcd7bbaeU);
+    void* gattUUID = _BlePluginGetOrCreateUuidObject(
+
+        0xB9F5FF00U, 0xD81346C6U, 0x8B61B453U, 0xEE2C74D9U);
 
     void* serviceUUID = _BlePluginGetOrCreateUuidObject(0x10B20100U, 0x5B3B4571U, 0x9508CF3EU, 0xFCD7BBAEU);
     void* charaUUID = _BlePluginGetOrCreateUuidObject(0x10B20102U, 0x5B3B4571U, 0x9508CF3EU, 0xFCD7BBAEU);
@@ -50,7 +51,9 @@ void TestRun(){
 
         debugDevices(watcher);
         if (_BlePluginScanGetDeviceLength() > 0) {
-            break;
+         //   break;
+            std::cout << "service count"
+                << _BlePluginScanGetDeviceServiceCount(0) << std::endl;
         }
         Sleep(500);
     }
