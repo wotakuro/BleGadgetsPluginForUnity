@@ -14,10 +14,9 @@ namespace BleGadget
 
         private string currntService;
         // serviceUUID•K{‚Í‰¼À‘•(¦toio‚ÌBLE©‘Ì‚ğ­‚µ‰ü•Ï‚µ‚È‚¢‚Æ•œ”‹@í‘Î‰‚Å‚«‚È‚¢
-        public void Initialize(string serviceUuid)
+        public void Initialize()
         {
             // [‰¼À‘•] serviceUUID
-            currntService = serviceUuid;
             toio.Ble.Initialize(OnInitialize, OnInitializeFailed);
         }
 
@@ -42,9 +41,10 @@ namespace BleGadget
             toio.Ble.Finalize();
         }
 
-        public void StartScan()
+        public void StartScan(string serviceUuid)
         {
 
+            currntService = serviceUuid;
             // [‰¼À‘•] serviceUUID
             toio.Ble.StartScan( new string[] { currntService } /* DeviceBuilder.GetServices() */,
                 this.OnFindDevice);

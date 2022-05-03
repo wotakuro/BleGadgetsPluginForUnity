@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace BleGadget
+namespace BleGadget.Devices
 {
     public class MabeeeDevice : BleDevice
     {
@@ -50,28 +50,21 @@ namespace BleGadget
         }
 
         private int currentPower = 0;
-        public int OutputPower
+        public void SetOutputPower(int pow)
         {
-            set
+            if (currentPower == pow)
             {
-                if (currentPower == value)
-                {
-                    return;
-                }
-                //Debug.Log("Setoutput Power " + value);
-                buffer[0] = 1;
-                // value
-                buffer[1] = (byte)(value & 0xFF);
-                buffer[2] = (byte)(value >> 8 & 0xFF);
-                buffer[3] = (byte)(value >> 16 & 0xFF);
-                buffer[4] = (byte)(value >> 24 & 0xFF);
-                WriteRequest(ServiceUUID, pwmDutyUuid, buffer, 5);
-                this.currentPower = value;
+                return;
             }
-            get
-            {
-                return currentPower;
-            }
+            //Debug.Log("Setoutput Power " + value);
+            buffer[0] = 1;
+            // value
+            buffer[1] = (byte)(pow & 0xFF);
+            buffer[2] = (byte)(pow >> 8 & 0xFF);
+            buffer[3] = (byte)(pow >> 16 & 0xFF);
+            buffer[4] = (byte)(pow >> 24 & 0xFF);
+            WriteRequest(ServiceUUID, pwmDutyUuid, buffer, 5);
+            this.currentPower = pow;
         }
 
         private void UpdateBatteryData()

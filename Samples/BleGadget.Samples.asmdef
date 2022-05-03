@@ -1,0 +1,19 @@
+{
+    "name": "BleGadget.Samples",
+    "rootNamespace": "",
+    "references": [
+        "GUID:fc36ad42153aa9f4ba74b1ecd12b060e"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "WindowsStandalone64"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
