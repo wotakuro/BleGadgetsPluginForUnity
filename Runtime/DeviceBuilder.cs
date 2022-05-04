@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ namespace BleGadget
 
     /// <summary>
     /// Device Builder
-    /// ŠeDevice‚Í RegisterBuilder‚ÅƒT[ƒrƒX‚ÌUUID‚ÆÀÛ‚ÌƒIƒuƒWƒFƒNƒgì¬‚ğ•R‚Ã‚¯‚Ä‚­‚¾‚³‚¢ 
+    /// å„Deviceã¯ RegisterBuilderã§ã‚µãƒ¼ãƒ“ã‚¹ã®UUIDã¨å®Ÿéš›ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆä½œæˆã‚’ç´ã¥ã‘ã¦ãã ã•ã„ 
     /// </summary>
     public static class DeviceBuilder
     {

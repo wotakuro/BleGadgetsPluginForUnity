@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -46,12 +46,12 @@ namespace BleGadget.Devices
 
 
         /// <summary>
-        /// ���[�^�[�o�͐ݒ�
-        /// �������l���A�����Ďw�肳�ꂽ�ꍇ�͍X�V���܂���
+        /// モーター出力設定
+        /// ※同じ値が連続して指定された場合は更新しません
         /// </summary>
-        /// <param name="idx">���[�^�[�̎w�� . 0-1�Ŏw�肵�܂�</param>
-        /// <param name="pow">���[�^�[�̏o�́B-0x80�`0x7f�Ŏw�肵�܂�</param>
-        /// <param name="forceUpdate">�����A�b�v�f�[�g�t���O</param>
+        /// <param name="idx">モーターの指定 . 0-1で指定します</param>
+        /// <param name="pow">モーターの出力。-0x80～0x7fで指定します</param>
+        /// <param name="forceUpdate">強制アップデートフラグ</param>
         public void SetMotorPwm(int idx,int pow,bool forceUpdate = false)
         {
             if(idx < 0 || idx >= motorPower.Length)
@@ -80,11 +80,11 @@ namespace BleGadget.Devices
         }
 
         /// <summary>
-        /// �|�[�g�o�͂�On/Off�؂�ւ�
-        /// �������l���A�����Ďw�肳�ꂽ�ꍇ�͍X�V���܂���
+        /// ポート出力のOn/Off切り替え
+        /// ※同じ値が連続して指定された場合は更新しません
         /// </summary>
-        /// <param name="flag">bit0[0x01]/bit1[0x02]/bit2[0x04]/bit3[0x08]�Ƃ����`�Őݒ肵�܂�</param>
-        /// <param name="forceUpdate">�����A�b�v�f�[�g�t���O</param>
+        /// <param name="flag">bit0[0x01]/bit1[0x02]/bit2[0x04]/bit3[0x08]という形で設定します</param>
+        /// <param name="forceUpdate">強制アップデートフラグ</param>
         public void SetPortOut(int flag, bool forceUpdate = false)
         {
             buffer[0] = (byte)flag;
@@ -96,12 +96,12 @@ namespace BleGadget.Devices
         }
 
         /// <summary>
-        /// �T�[�{�̈ʒu���X�V���܂�
-        /// �������l���A�����Ďw�肳�ꂽ�ꍇ�͍X�V���܂���
+        /// サーボの位置を更新します
+        /// ※同じ値が連続して指定された場合は更新しません
         /// </summary>
-        /// <param name="idx">�Ώۂ̃T�[�{���[�^�[(0�`3)</param>
-        /// <param name="position">�|�W�V�����̐ݒ� (0x00�`0xFF)</param>
-        /// <param name="forceUpdate">�����A�b�v�f�[�g�t���O</param>
+        /// <param name="idx">対象のサーボモーター(0～3)</param>
+        /// <param name="position">ポジションの設定 (0x00～0xFF)</param>
+        /// <param name="forceUpdate">強制アップデートフラグ</param>
         public void SetServoPosition(int idx, int position, bool forceUpdate = false)
         {
             if(idx < 0 || idx >= servoParam.Length)
@@ -127,16 +127,16 @@ namespace BleGadget.Devices
         }
 
         /// <summary>
-        /// ��C�ɍX�V����R�}���h�Ăяo���܂�
-        /// �����łɓ����l���w�肳�ꂽ�ꍇ�͍X�V���܂���
+        /// 一気に更新するコマンド呼び出します
+        /// ※すでに同じ値が指定された場合は更新しません
         /// </summary>
-        /// <param name="motor1">���[�^�[�P�̏o�́B-0x80�`0x7f�Ŏw�肵�܂�</param>
-        /// <param name="motor2">���[�^�[�Q�̏o�́B-0x80�`0x7f�Ŏw�肵�܂�</param>
-        /// <param name="portFlag">�|�[�g�t���O�Bbit0[0x01]/bit1[0x02]/bit2[0x04]/bit3[0x08]�Ƃ����`�Őݒ肵�܂�</param>
-        /// <param name="servo1">�T�[�{���[�^�[�P�̈ʒu�X�V�B�|�W�V�����̐ݒ� (0x00�`0xFF)</param>
-        /// <param name="servo2">�T�[�{���[�^�[�Q�̈ʒu�X�V�B�|�W�V�����̐ݒ� (0x00�`0xFF)</param>
-        /// <param name="servo3">�T�[�{���[�^�[�R�̈ʒu�X�V�B�|�W�V�����̐ݒ� (0x00�`0xFF)</param>
-        /// <param name="servo4">�T�[�{���[�^�[�S�̈ʒu�X�V�B�|�W�V�����̐ݒ� (0x00�`0xFF)</param>
+        /// <param name="motor1">モーター１の出力。-0x80～0x7fで指定します</param>
+        /// <param name="motor2">モーター２の出力。-0x80～0x7fで指定します</param>
+        /// <param name="portFlag">ポートフラグ。bit0[0x01]/bit1[0x02]/bit2[0x04]/bit3[0x08]という形で設定します</param>
+        /// <param name="servo1">サーボモーター１の位置更新。ポジションの設定 (0x00～0xFF)</param>
+        /// <param name="servo2">サーボモーター２の位置更新。ポジションの設定 (0x00～0xFF)</param>
+        /// <param name="servo3">サーボモーター３の位置更新。ポジションの設定 (0x00～0xFF)</param>
+        /// <param name="servo4">サーボモーター４の位置更新。ポジションの設定 (0x00～0xFF)</param>
         /// <param name="forceUpdate"></param>
         public void SetBurstCommand(int motor1,int motor2,
             int portFlag,int servo1,int servo2,int servo3,int servo4, 

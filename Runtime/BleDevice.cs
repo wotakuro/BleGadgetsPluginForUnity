@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,8 +6,8 @@ namespace BleGadget
 {
 
     /// <summary>
-    /// BLEƒfƒoƒCƒX‚Ìƒx[ƒXB
-    /// ‚±‚ê‚ğ”h¶‚µ‚½ƒNƒ‰ƒX‚ğì‚Á‚Ä‰º‚µ‚ 
+    /// BLEãƒ‡ãƒã‚¤ã‚¹ã®ãƒ™ãƒ¼ã‚¹ã€‚
+    /// ã“ã‚Œã‚’æ´¾ç”Ÿã—ãŸã‚¯ãƒ©ã‚¹ã‚’ä½œã£ã¦ä¸‹ã—ã‚
     /// </summary>
     public abstract class BleDevice
     {

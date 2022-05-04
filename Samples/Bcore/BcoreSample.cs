@@ -7,23 +7,34 @@ using BleGadget.Devices;
 
 namespace BleGadget.Samples
 {
-    public class MabeeeSample : MonoBehaviour
+    public class BcoreSample : MonoBehaviour
     {
+
         // BLEデバイススキャン開始ボタン
         [SerializeField]
         private Button startScanBtn;
         // 見つかったBLEデバイスに接続するボタン
         [SerializeField]
         private Button connectBtn;
-        // Mabeeeの出力用のバー
+
+        // 一気に値を設定するBurstコマンドを利用するか？
         [SerializeField]
-        private Slider outputPowSlider;
-
+        private Toggle burstCommad;
 
         [SerializeField]
-        private Text infoArea;
+        private Slider[] motorOutputSliders;
 
-        private void Start()
+        [SerializeField]
+        private Slider[] servoPositionSliders;
+
+        [SerializeField]
+        private Toggle[] portOutputToggles;
+
+        [SerializeField]
+        private Text debugText;
+
+        // Start is called before the first frame update
+        void Start()
         {
             // 各ボタンを押したときの処理を設定します
             startScanBtn.onClick.AddListener(OnClickStartScanButton);
@@ -32,19 +43,16 @@ namespace BleGadget.Samples
             BleDeviceManager.Instance.Initialize();
         }
 
-
-
         private void OnClickStartScanButton()
         {
             // DeviceのServiceを指定してスキャンを開始します。
             // 現在は1つまでしか接続できません
-            BleDeviceManager.Instance.StartScan(MabeeeDevice.ServiceUUID);
+            BleDeviceManager.Instance.StartScan(BcoreDevice.ServiceUUID);
         }
-
         private void OnClickConnectButton()
         {
-            // Scanして発見したMabeeeデバイスを列挙します
-            var list = new List<MabeeeDevice>();
+            // Scanして発見したbcoreデバイスを列挙します
+            var list = new List<BcoreDevice>();
             BleDeviceManager.Instance.GetConnectableDevices(list);
             Debug.Log("Connect Device " + list.Count);
             for (int i = 0; i < list.Count; ++i)
@@ -53,28 +61,5 @@ namespace BleGadget.Samples
                 list[i].Connect();
             }
         }
-
-        private void Update()
-        {
-            // Mabeeデバイスをリストアップします
-            var list = new List<MabeeeDevice>();
-            BleDeviceManager.Instance.GetAllDevices(list);
-            string txt = "Devices " + list.Count + "\n";
-            for (int i = 0; i < list.Count; ++i)
-            {
-                txt += list[i].Address + ":" + list[i].Rssi + "::" + list[i].IsConnect + "\n";
-            }
-            this.infoArea.text = txt;
-
-            // Sliderの値を接続中のMabeeeの出力値にセットします
-            BleDeviceManager.Instance.GetConnectedDevices(list);
-            for (int i = 0; i < list.Count; ++i)
-            {
-                var mabeee = list[i];
-                mabeee.SetOutputPower( (int)outputPowSlider.value );
-            }
-        }
-
-
     }
 }

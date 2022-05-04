@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,10 +13,10 @@ namespace BleGadget
         private BleDeviceManager() { }
 
         private string currntService;
-        // serviceUUID•K{‚Í‰¼À‘•(¦toio‚ÌBLE©‘Ì‚ğ­‚µ‰ü•Ï‚µ‚È‚¢‚Æ•œ”‹@í‘Î‰‚Å‚«‚È‚¢
+        // serviceUUIDå¿…é ˆã¯ä»®å®Ÿè£…(â€»toioã®BLEè‡ªä½“ã‚’å°‘ã—æ”¹å¤‰ã—ãªã„ã¨å¾©æ•°æ©Ÿç¨®å¯¾å¿œã§ããªã„
         public void Initialize()
         {
-            // [‰¼À‘•] serviceUUID
+            // [ä»®å®Ÿè£…] serviceUUID
             toio.Ble.Initialize(OnInitialize, OnInitializeFailed);
         }
 
@@ -45,7 +45,7 @@ namespace BleGadget
         {
 
             currntService = serviceUuid;
-            // [‰¼À‘•] serviceUUID
+            // [ä»®å®Ÿè£…] serviceUUID
             toio.Ble.StartScan( new string[] { currntService } /* DeviceBuilder.GetServices() */,
                 this.OnFindDevice);
         }
@@ -107,7 +107,7 @@ namespace BleGadget
             }
             BleDevice device;
             if(!deviceDictionary.TryGetValue(addr,out device) ){
-                // [‰¼À‘•] serviceUUID
+                // [ä»®å®Ÿè£…] serviceUUID
                 var builder = DeviceBuilder.GetBuilder(this.currntService);
                 if (builder != null)
                 {
