@@ -66,19 +66,18 @@ namespace BleGadget.Devices
                 return;
             }
             buffer[0] = (byte)idx;
-            if (pow >= 0)
-            {
-                buffer[1] = (byte)(0x80 + pow);
-            }
-            else
-            {
-                buffer[1] = (byte)(0x80 + pow);
-            }
+            buffer[1] = ConvertMoterPower(pow);
+
             if (forceUpdate || motorPower[idx] != pow)
             {
                 this.WriteRequest(ServiceUUID, CharastristicSetMotorPWM, buffer, 2);
             }
             motorPower[idx] = pow;
+        }
+
+        private static byte ConvertMoterPower(int pow)
+        {
+            return (byte)(0x80 + pow);
         }
 
         /// <summary>
@@ -144,8 +143,8 @@ namespace BleGadget.Devices
             int portFlag, int servo1, int servo2, int servo3, int servo4,
             bool forceUpdate = false)
         {
-            buffer[0] = (byte)motor1;
-            buffer[1] = (byte)motor2;
+            buffer[0] = ConvertMoterPower(motor1);
+            buffer[1] = ConvertMoterPower(motor2);
             buffer[2] = (byte)portFlag;
             buffer[3] = (byte)servo1;
             buffer[4] = (byte)servo2;
