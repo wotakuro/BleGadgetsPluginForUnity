@@ -118,6 +118,10 @@ namespace toio.Android
             var getDeviceNameByAddrMethod = AndroidJNI.GetMethodID(this.bleScannerCls, "getDeviceNameByAddr", "(Ljava/lang/String;)Ljava/lang/String;");
             var getRssiByAddrMethod = AndroidJNI.GetMethodID(this.bleScannerCls, "getRssiByAddr", "(Ljava/lang/String;)I");
 
+            var getServiceCountByAddrMethod = AndroidJNI.GetMethodID(this.bleScannerCls, "getServiceCountByAddr", "(Ljava/lang/String;)I");
+            var getServiceByAddrAndIdxMethod = AndroidJNI.GetMethodID(this.bleScannerCls, "getServiceByAddrAndIdx", "(Ljava/lang/String;I)Ljava/lang/String;");
+
+
             AndroidJNI.CallVoidMethod(scanner, blitMethod, null);
             int num = AndroidJNI.CallIntMethod(scanner, getDeviceNumMethod, null);
             scannedDevices.Clear();
@@ -128,6 +132,13 @@ namespace toio.Android
                 argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr));
                 string name = AndroidJNI.CallStringMethod(scanner, getDeviceNameByAddrMethod, argBuilder.Build());
                 int rssi = AndroidJNI.CallIntMethod(scanner, getRssiByAddrMethod, argBuilder.Build());
+                
+                int serviceCount = AndroidJNI.CallIntMethod(scanner, getServiceCountByAddrMethod, argBuilder.Build());
+                for(int j = 0;j<serviceCount;++j){
+                    argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr)).Append(ArgJvalueBuilder.GenerateJvalue(j));
+                    string service = AndroidJNI.CallStringMethod(scanner, getServiceByAddrAndIdxMethod, argBuilder.Build());
+                }
+
                 var scanDevice = new BleScannedDevice(addr, name, rssi);
                 this.scannedDevices.Add(scanDevice);
             }

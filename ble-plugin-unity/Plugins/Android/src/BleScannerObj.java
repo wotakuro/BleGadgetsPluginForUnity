@@ -23,10 +23,12 @@ public class BleScannerObj extends ScanCallback{
 
     private HashMap<String,BluetoothDevice> bleDevices = new HashMap<String,BluetoothDevice>();
     private HashMap<String,Integer> bleRssi = new HashMap<String,Integer>();
+    private HashMap<String,String[]> bleServices = new HashMap<String,String[]>();
 
     private HashMap<String,BluetoothDevice> pubBleDevices = new HashMap<String,BluetoothDevice>();
     private HashMap<String,Integer> pubBleRssi = new HashMap<String,Integer>();
     private HashMap<String,BluetoothDevice> foundDevicesInScan = new HashMap<String,BluetoothDevice>();
+    private HashMap<String, String[]> pubBleServices = new HashMap<String,String[]>();
 
     private List<String> pubAddresses = new ArrayList<String>();
     private List<ScanFilter> scanFilters = new ArrayList<>(8);
@@ -42,12 +44,14 @@ public class BleScannerObj extends ScanCallback{
     public void blit(){
         this.pubAddresses.clear();
         this.pubBleDevices.clear();
+        this.pubBleServices.clear();
         synchronized (this) {
             for (Map.Entry<String, BluetoothDevice> entry : bleDevices.entrySet()) {
                 String addr = entry.getKey();
                 this.pubAddresses.add(addr);
                 this.pubBleDevices.put(addr, entry.getValue());
                 this.pubBleRssi.put(addr, bleRssi.get(addr));
+                this.pubBleServices.put(addr, bleServices.get(addr));
                 this.foundDevicesInScan.put(addr,entry.getValue());
             }
             this.bleDevices.clear();
@@ -78,7 +82,25 @@ public class BleScannerObj extends ScanCallback{
     }
 
     public int getRssiByAddr(String addr){
-        return bleRssi.get(addr);
+        return pubBleRssi.get(addr);
+    }
+
+    public int getServiceCountByAddr(String addr){
+        String[] services = pubBleServices.get(addr);
+        if(services == null ){
+            return 0;
+        }
+        return services.length;
+    }
+    public String getServiceByAddrAndIdx(String addr,int idx){
+        String[] services = pubBleServices.get(addr);
+        if(services == null ){
+            return "";
+        }
+        if(idx < 0 || idx >= services.length ){
+            return "";
+        }
+        return services[idx];
     }
 
     public void startScan(String uuid){
@@ -123,6 +145,9 @@ public class BleScannerObj extends ScanCallback{
 
         String addr =  bluetoothDevice.getAddress();
         synchronized (this) {
+            if(this.bleServices.containsKey(addr) ){
+                this.bleServices.put(addr , getBluetoothServices(bluetoothDevice) );
+            }
             this.bleDevices.put(addr, bluetoothDevice);
             this.bleRssi.put(addr, result.getRssi());
         }
@@ -142,6 +167,18 @@ public class BleScannerObj extends ScanCallback{
                 this.bleRssi.put(addr, result.getRssi());
             }
         }
+    }
+  
+    private String[] getBluetoothServices(BluetoothDevice device){
+        ParcelUuid[] uuids = device.getUuids();
+        String [] ret = new String[ uuids.length ];
+        int idx = 0;
+        for(ParcelUuid uuid : uuids){
+            UUID uuidObj = uuid.getUuid();
+            ret[idx] = uuidObj.toString();
+            ++ idx;
+        }
+        return ret;
     }
 
     @Override
