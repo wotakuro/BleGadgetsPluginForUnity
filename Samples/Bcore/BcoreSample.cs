@@ -61,5 +61,60 @@ namespace BleGadget.Samples
                 list[i].Connect();
             }
         }
+
+        private void Update()
+        {
+            // Mabeeデバイスをリストアップします
+            var list = new List<BcoreDevice>();
+            BleDeviceManager.Instance.GetAllDevices(list);
+            string txt = "Devices " + list.Count + "\n";
+            for (int i = 0; i < list.Count; ++i)
+            {
+                txt += list[i].Address + ":" + list[i].Rssi + "::" + list[i].IsConnect + "\n";
+            }
+            this.debugText.text = txt;
+
+            // Sliderの値を接続中のbcoreの出力値にセットします
+            BleDeviceManager.Instance.GetConnectedDevices(list);
+            for (int i = 0; i < list.Count; ++i)
+            {
+                var bcore = list[i];
+                if (burstCommad.isOn)
+                {
+                    int portVal = BcoreDevice.GetPortValue(portOutputToggles[0].isOn,
+                            portOutputToggles[1].isOn,
+                            portOutputToggles[2].isOn,
+                            portOutputToggles[3].isOn);
+                    bcore.SetBurstCommand(
+                        (int)motorOutputSliders[0].value,
+                        (int)motorOutputSliders[1].value,
+                        portVal,
+                        (int)servoPositionSliders[0].value,
+                        (int)servoPositionSliders[1].value,
+                        (int)servoPositionSliders[2].value,
+                        (int)servoPositionSliders[3].value ) ;
+                }
+                else
+                {
+                    for(int j = 0; j < motorOutputSliders.Length; ++j)
+                    {
+                        int power = (int)motorOutputSliders[j].value;
+                        bcore.SetMotorPwm(j, power);
+                    }
+                    for (int j = 0; j < servoPositionSliders.Length; ++j)
+                    {
+                        int position = (int)servoPositionSliders[j].value;
+                        bcore.SetServoPosition(j, position);
+                    }
+
+                    bcore.SetPortOut(
+                        BcoreDevice.GetPortValue(portOutputToggles[0].isOn,
+                            portOutputToggles[1].isOn,
+                            portOutputToggles[2].isOn,
+                            portOutputToggles[3].isOn));
+                }
+            }
+        }
+
     }
 }

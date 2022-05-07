@@ -21,7 +21,7 @@ namespace BleGadget.Devices
         [RuntimeInitializeOnLoadMethod]
         public static void RegisterToBuilder()
         {
-            DeviceBuilder.RegistBuilder(ServiceUUID ,(m,addr)=>new BcoreDevice(m,addr) );
+            DeviceBuilder.RegistBuilder(ServiceUUID, (m, addr) => new BcoreDevice(m, addr));
         }
 
 
@@ -31,7 +31,8 @@ namespace BleGadget.Devices
         private int portOut;
         private int[] servoParam = new int[4];
 
-        public BcoreDevice(BleDeviceManager m, string addr) : base(m, addr) {
+        public BcoreDevice(BleDeviceManager m, string addr) : base(m, addr)
+        {
             this.portOut = 0x7FFFFFFF;
             for (int i = 0; i < motorPower.Length; ++i)
             {
@@ -52,19 +53,20 @@ namespace BleGadget.Devices
         /// <param name="idx">モーターの指定 . 0-1で指定します</param>
         /// <param name="pow">モーターの出力。-0x80～0x7fで指定します</param>
         /// <param name="forceUpdate">強制アップデートフラグ</param>
-        public void SetMotorPwm(int idx,int pow,bool forceUpdate = false)
+        public void SetMotorPwm(int idx, int pow, bool forceUpdate = false)
         {
-            if(idx < 0 || idx >= motorPower.Length)
+            if (idx < 0 || idx >= motorPower.Length)
             {
                 Debug.LogError("SetMotorPwm Invalid index " + idx);
                 return;
             }
-            if(pow > 0x7f || pow < -0x80) {
+            if (pow > 0x7f || pow < -0x80)
+            {
                 Debug.LogError("SetMotorPwm Invalid Power " + pow);
-                return; 
+                return;
             }
             buffer[0] = (byte)idx;
-            if(pow >= 0)
+            if (pow >= 0)
             {
                 buffer[1] = (byte)(0x80 + pow);
             }
@@ -88,7 +90,7 @@ namespace BleGadget.Devices
         public void SetPortOut(int flag, bool forceUpdate = false)
         {
             buffer[0] = (byte)flag;
-            if(forceUpdate || flag != this.portOut)
+            if (forceUpdate || flag != this.portOut)
             {
                 this.WriteRequest(ServiceUUID, CharastristicSetPortOut, buffer, 1);
             }
@@ -104,13 +106,13 @@ namespace BleGadget.Devices
         /// <param name="forceUpdate">強制アップデートフラグ</param>
         public void SetServoPosition(int idx, int position, bool forceUpdate = false)
         {
-            if(idx < 0 || idx >= servoParam.Length)
+            if (idx < 0 || idx >= servoParam.Length)
             {
                 Debug.LogError("SetServoPosition Invalid index " + idx);
                 return;
 
             }
-            if(position < 0 || position > 0xFF)
+            if (position < 0 || position > 0xFF)
             {
                 Debug.LogError("SetServoPosition Invalid position " + position);
                 return;
@@ -138,8 +140,8 @@ namespace BleGadget.Devices
         /// <param name="servo3">サーボモーター３の位置更新。ポジションの設定 (0x00～0xFF)</param>
         /// <param name="servo4">サーボモーター４の位置更新。ポジションの設定 (0x00～0xFF)</param>
         /// <param name="forceUpdate"></param>
-        public void SetBurstCommand(int motor1,int motor2,
-            int portFlag,int servo1,int servo2,int servo3,int servo4, 
+        public void SetBurstCommand(int motor1, int motor2,
+            int portFlag, int servo1, int servo2, int servo3, int servo4,
             bool forceUpdate = false)
         {
             buffer[0] = (byte)motor1;
@@ -151,13 +153,13 @@ namespace BleGadget.Devices
             buffer[6] = (byte)servo4;
 
             if (forceUpdate ||
-                ( this.motorPower[0] != motor1 || 
+                (this.motorPower[0] != motor1 ||
                 this.motorPower[1] != motor2 ||
                 this.portOut != portFlag ||
-                this.servoParam[0] != servo1 ||            
+                this.servoParam[0] != servo1 ||
                 this.servoParam[1] != servo2 ||
                 this.servoParam[2] != servo3 ||
-                this.servoParam[3] != servo4 ))
+                this.servoParam[3] != servo4))
             {
                 this.WriteRequest(ServiceUUID, CharastristicBurstCommand,
                     buffer, 7);
@@ -182,8 +184,28 @@ namespace BleGadget.Devices
         {
         }
 
-
-
-
+        public static int GetPortValue(bool p1,bool p2,bool p3,bool p4)
+        {
+            int val = 0;
+            if (p1)
+            {
+                val |= 0x01;
+            }
+            if (p2)
+            {
+                val |= 0x02;
+            }
+            if (p3)
+            {
+                val |= 0x04;
+            }
+            if (p4)
+            {
+                val |= 0x08;
+            }
+            return val;
         }
+
+
     }
+}
