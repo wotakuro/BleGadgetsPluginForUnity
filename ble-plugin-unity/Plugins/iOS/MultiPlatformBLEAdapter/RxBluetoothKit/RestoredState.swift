@@ -65,7 +65,7 @@ import CoreBluetooth
             return arrayOfAnyObjects.compactMap { $0 as? CBService }
                 .map(RxCBService.init)
                 .map { Service(peripheral: Peripheral(manager: bluetoothManager,
-                                                      peripheral: RxCBPeripheral(peripheral: $0.service.peripheral)),
+                                                      peripheral: RxCBPeripheral(peripheral: $0.service.peripheral!)),
                                service: $0) }
         }
     }
