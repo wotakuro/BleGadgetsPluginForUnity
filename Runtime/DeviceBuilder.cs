@@ -5,46 +5,65 @@ using UnityEngine;
 namespace BleGadget
 {
 
+    public interface IDeviceBuilder
+    {
+        BleDevice BuildDevice(BleDeviceManager m, string addr);
+
+        bool IsMatchBuilder(List<string> services);
+
+        int builderPriority { get; }
+
+        string scanServiceUuid { get; }
+        
+    }
+
     /// <summary>
     /// Device Builder
     /// 各Deviceは RegisterBuilderでサービスのUUIDと実際のオブジェクト作成を紐づけてください 
     /// </summary>
-    public static class DeviceBuilder
+    public static class DeviceBuilderManager
     {
-        public delegate BleDevice BuildDeviceDelegate(BleDeviceManager m , string addr);
-
-        public static Dictionary<string, BuildDeviceDelegate> s_builders = new Dictionary<string, BuildDeviceDelegate>();
+        private static List<IDeviceBuilder> s_deviceBuilders = new List<IDeviceBuilder>();
 
 
-        public static void RegistBuilder(string serviceUuid, BuildDeviceDelegate builder)
+        public static bool IsMatchBuilder(string maiServiceId, List<string> services)
         {
-            serviceUuid = serviceUuid.ToUpper();
-            if (s_builders.ContainsKey(serviceUuid))
+            foreach(var service in services)
             {
-                Debug.LogError("All ready exist service " + serviceUuid);
+                if(maiServiceId.ToUpper() == service.ToUpper())
+                {
+                    return true;
+                }
             }
-            s_builders.Add(serviceUuid, builder);
+            return false;
+        }
+
+
+        public static void RegistBuilder(IDeviceBuilder builder)
+        {
+            s_deviceBuilders.Add(builder);
         }
 
         public static string[] GetServices()
         {
-            var array = new string[s_builders.Count];
+            var array = new string[s_deviceBuilders.Count];
             int idx = 0;
-            foreach( var key in s_builders.Keys)
+            foreach( var builder in s_deviceBuilders)
             {
-                array[idx] = key;
+                array[idx] = builder.scanServiceUuid.ToUpper();
                 ++idx;
             }
             return array;
         }
 
-        public static BuildDeviceDelegate GetBuilder(string serviceUuid)
+        public static IDeviceBuilder GetBuilder(List<string> services)
         {
-            serviceUuid = serviceUuid.ToUpper();
-            BuildDeviceDelegate builder;
-            if(s_builders.TryGetValue(serviceUuid, out builder))
+            foreach (var builder in s_deviceBuilders)
             {
-                return builder;
+                if (builder.IsMatchBuilder(services) )
+                {
+                    return builder;
+                }
             }
             return null;
         }

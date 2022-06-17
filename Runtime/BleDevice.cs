@@ -56,11 +56,11 @@ namespace BleGadget
             this.charastrics.Clear();
         }
 
-        internal void OnDiscoverService(string serviceUuid)
+        public virtual void OnDiscoverService(string serviceUuid)
         {
 
         }
-        internal void OnDiscoverCharastristic(string serviceUuid,string charastristicUuid)
+        public virtual void OnDiscoverCharastristic(string serviceUuid,string charastristicUuid)
         {
         }
 

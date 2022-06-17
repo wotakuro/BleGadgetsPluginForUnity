@@ -6,7 +6,7 @@ using UnityEngine;
 namespace BleGadget.Devices
 {
     // https://github.com/ymmtynk/bCore/wiki/2.1._bCoreServiceCharacteristic
-    public class BcoreDevice : BleDevice
+    public class BcoreDevice : BleDevice 
     {
         public static readonly string ServiceUUID = "389CAAF0-843F-4d3b-959D-C954CCE14655";
 
@@ -21,15 +21,34 @@ namespace BleGadget.Devices
         [RuntimeInitializeOnLoadMethod]
         public static void RegisterToBuilder()
         {
-            DeviceBuilder.RegistBuilder(ServiceUUID, (m, addr) => new BcoreDevice(m, addr));
+          //  DeviceBuilderManager.RegistBuilder(new Builder() );
         }
 
+
+        class Builder:IDeviceBuilder
+        {
+            public int builderPriority =>0;
+
+            public string scanServiceUuid => ServiceUUID;
+
+            public BleDevice BuildDevice(BleDeviceManager m, string addr)
+            {
+                return new BcoreDevice(m, addr);
+            }
+
+            public bool IsMatchBuilder(List<string> services)
+            {
+                return DeviceBuilderManager.IsMatchBuilder(scanServiceUuid, services);
+            }
+
+        }
 
 
         private byte[] buffer = new byte[32];
         private int[] motorPower = new int[2];
         private int portOut;
         private int[] servoParam = new int[4];
+
 
         public BcoreDevice(BleDeviceManager m, string addr) : base(m, addr)
         {
@@ -204,7 +223,6 @@ namespace BleGadget.Devices
             }
             return val;
         }
-
 
     }
 }

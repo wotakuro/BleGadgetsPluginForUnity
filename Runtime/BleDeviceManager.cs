@@ -9,6 +9,7 @@ namespace BleGadget
         public static BleDeviceManager Instance { get; private set; } = new BleDeviceManager();
 
         private Dictionary<string, BleDevice> deviceDictionary;
+        private Dictionary<string, List<string>> deviceServices = new Dictionary<string, List<string>>();
 
         private BleDeviceManager() { }
 
@@ -41,13 +42,12 @@ namespace BleGadget
             toio.Ble.Finalize();
         }
 
-        public void StartScan(string serviceUuid)
-        {
 
-            currntService = serviceUuid;
-            // [仮実装] serviceUUID
-            toio.Ble.StartScan( new string[] { currntService } /* DeviceBuilder.GetServices() */,
-                this.OnFindDevice);
+        public void StartScan()
+        {
+            var services = DeviceBuilderManager.GetServices();
+            toio.Ble.StartScan( services,
+                this.OnFindDevice, OnFindDeviceServices);
         }
 
         public void StopScan()
@@ -98,6 +98,28 @@ namespace BleGadget
             }
         }
 
+
+        private void OnFindDeviceServices(string addr,List<string> services)
+        {
+            if (!deviceServices.ContainsKey(addr))
+            {
+                List<string> list = new List<string>(services.Count);
+                foreach (var service in services) {
+                    list.Add(service.ToUpper());
+                }
+                deviceServices.Add(addr, list);
+            }
+        }
+        private List<string> GetDeviceServices(string addr)
+        {
+            List<string> services;
+            if (deviceServices.TryGetValue(addr,out services))
+            {
+                return services;
+            }
+            return null; 
+        }
+        
         private void OnFindDevice(string addr, string name, int rssi, byte[] data)
         {
             //Debug.Log("OnFindDevice : " + addr + "::" + rssi);
@@ -107,11 +129,10 @@ namespace BleGadget
             }
             BleDevice device;
             if(!deviceDictionary.TryGetValue(addr,out device) ){
-                // [仮実装] serviceUUID
-                var builder = DeviceBuilder.GetBuilder(this.currntService);
+                var builder = DeviceBuilderManager.GetBuilder( this.GetDeviceServices(addr) );
                 if (builder != null)
                 {
-                    device = builder(this, addr);
+                    device = builder.BuildDevice(this, addr);
                     deviceDictionary.Add(addr, device);
                 }
                 else
@@ -146,7 +167,6 @@ namespace BleGadget
         }
         internal void OnDiscoveredCharacteristic(string addr, string serviceUuid,string charastristicUuid)
         {
-            Debug.Log("OnDiscoveredCharacteristic " + addr + "::" + serviceUuid + "::" + charastristicUuid);
             BleDevice device;
             if (deviceDictionary.TryGetValue(addr, out device))
             {

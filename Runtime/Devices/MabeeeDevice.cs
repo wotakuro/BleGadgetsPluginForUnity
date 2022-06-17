@@ -16,12 +16,31 @@ namespace BleGadget.Devices
         [RuntimeInitializeOnLoadMethod]
         public static void RegisterToBuilder()
         {
-            DeviceBuilder.RegistBuilder(ServiceUUID ,(m,addr)=>new MabeeeDevice(m,addr) );
+            DeviceBuilderManager.RegistBuilder(new Builder() );
+        }
+
+        class Builder : IDeviceBuilder
+        {
+            public int builderPriority => 0;
+            public string scanServiceUuid => ServiceUUID;
+
+            public BleDevice BuildDevice(BleDeviceManager m, string addr)
+            {
+                return new MabeeeDevice(m, addr);
+            }
+
+            public bool IsMatchBuilder(List<string> services)
+            {
+                return DeviceBuilderManager.IsMatchBuilder(scanServiceUuid, services);
+            }
+
         }
 
         public MabeeeDevice(BleDeviceManager m, string addr) : base(m, addr) { }
 
-        
+
+
+
 
         private byte[] buffer = new byte[32];
 

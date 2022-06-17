@@ -46,8 +46,7 @@ namespace BleGadget.Samples
         private void OnClickStartScanButton()
         {
             // DeviceのServiceを指定してスキャンを開始します。
-            // 現在は1つまでしか接続できません
-            BleDeviceManager.Instance.StartScan(BcoreDevice.ServiceUUID);
+            BleDeviceManager.Instance.StartScan();
         }
         private void OnClickConnectButton()
         {
