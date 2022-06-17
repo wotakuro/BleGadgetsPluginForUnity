@@ -14,7 +14,11 @@ namespace toio.Windows
     public class BleWin
     {
         private static Action<string, string, int, byte[]> s_discoverAction;
+        private static Action<string, List<string> > s_scanServiceAction;
+
+
         private static Dictionary<string, BleDiscoverEvents> s_deviceDiscoverEvents = new Dictionary<string, BleDiscoverEvents>();
+        private static Dictionary<string, List<string>> s_scanServiceList = new Dictionary<string, List<string>>();
 
         private static List<BleWriteRequestData> s_writeRequests = new List<BleWriteRequestData>();
         private static List<BleReadRequestData> s_readRequests = new List<BleReadRequestData>();
@@ -30,7 +34,9 @@ namespace toio.Windows
         {
             // clear data
             s_discoverAction = null;
+            s_scanServiceAction = null;
             s_deviceDiscoverEvents.Clear();
+            s_scanServiceList.Clear();
             s_writeRequests.Clear();
             s_readRequests.Clear();
             s_notifyEvents.Clear();
@@ -89,10 +95,12 @@ namespace toio.Windows
         }
 
         public static void StartScan(string[] serviceUUIDs, 
-            Action<string, string, int, byte[]> discoveredAction = null)
+            Action<string, string, int, byte[]> discoveredAction = null,Action<string,List<string>> serviceAction=null)
         {
             if (!s_isInitialized) { return; }
             s_discoverAction = discoveredAction;
+            s_scanServiceAction = serviceAction;
+            s_scanServiceList.Clear();
             DllInterface.ClearScanFilter();
             if (serviceUUIDs != null)
             {
@@ -245,23 +253,46 @@ namespace toio.Windows
                 var name = "";// DllInterface.ScanGetDeviceName(i);
                 //Debug.Log("UpdateScanDeviceEvents name " + name);
                 var rssi = DllInterface.ScanGetDeviceRssi(i);
+                List<string> services;
 
+                bool append1st = AppendScanDeviceServiceIds(identifier, i,out services);
 
-                var num = DllInterface.ScanGetDeviceServiceCount(i);
-                string serviceStr = "Services " + num;
-                for (int j = 0; j< num; ++j)
+                if (s_scanServiceAction != null && append1st)
                 {
-                    var uuid = DllInterface.ScanGetDeviceServiceUuid(i, j);
-                    serviceStr += "\n" + UuidDatabase.GetUuidStr(uuid);
+                    s_scanServiceAction(identifier, services);
                 }
-                UnityEngine.Debug.Log(serviceStr);
 
                 //Debug.Log("UpdateScanDeviceEvents rssi " + rssi);
-                if (s_discoverAction != null)
+                if (s_discoverAction != null && services != null)
                 {
                     s_discoverAction(identifier, name, rssi, null);
                 }
             }
+        }
+
+        private static bool AppendScanDeviceServiceIds(string identifier,int idx,out List<string> list)
+        {
+            if(s_scanServiceList.TryGetValue( identifier,out list))
+            {
+                return false;
+            }
+
+
+            var num = DllInterface.ScanGetDeviceServiceCount(idx);
+            if(num == 0) {
+                list = null;
+                return false;
+            }
+            list = new List<string>(num);
+            string serviceStr = "Services " + num;
+            for (int j = 0; j < num; ++j)
+            {
+                var uuid = DllInterface.ScanGetDeviceServiceUuid(idx, j);
+                list.Add(UuidDatabase.GetUuidStr(uuid));
+            }
+
+            s_scanServiceList.Add(identifier,list);
+            return true;
         }
 
         private static void UpdateDeviceConnectEvents()

@@ -26,6 +26,9 @@ namespace toio.Android
         private List<string> disconnectedDevices = new List<string>();
         private Dictionary<string, List<BleCharastericsKeyInfo> > charastericsKeyInfos = new Dictionary<string, List<BleCharastericsKeyInfo> >();
 
+        
+        private Dictionary<string, List<string>> scanServiceListByDevice = new Dictionary<string, List<string>>();
+
         public void Initialize()
         {
             this.argBuilder = new ArgJvalueBuilder();
@@ -74,6 +77,8 @@ namespace toio.Android
 
             AndroidJNI.CallVoidMethod(scanner, scanMethod, this.argBuilder.Build());
             AndroidJNI.PopLocalFrame(IntPtr.Zero);
+
+            scanServiceListByDevice.Clear();
         }
 
         public void StartScan(string[] uuids)
@@ -97,6 +102,7 @@ namespace toio.Android
 
             AndroidJNI.CallVoidMethod(scanner, startScanMethod, null);
             AndroidJNI.PopLocalFrame(IntPtr.Zero);
+            scanServiceListByDevice.Clear();
         }
 
         public void StopScan()
@@ -132,17 +138,40 @@ namespace toio.Android
                 argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr));
                 string name = AndroidJNI.CallStringMethod(scanner, getDeviceNameByAddrMethod, argBuilder.Build());
                 int rssi = AndroidJNI.CallIntMethod(scanner, getRssiByAddrMethod, argBuilder.Build());
-                
+
+                // 
+                UpdateScanedServices(addr, scanner, getServiceCountByAddrMethod, getServiceByAddrAndIdxMethod);
+                /*
                 int serviceCount = AndroidJNI.CallIntMethod(scanner, getServiceCountByAddrMethod, argBuilder.Build());
                 for(int j = 0;j<serviceCount;++j){
                     argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr)).Append(ArgJvalueBuilder.GenerateJvalue(j));
                     string service = AndroidJNI.CallStringMethod(scanner, getServiceByAddrAndIdxMethod, argBuilder.Build());
                 }
+                */
 
                 var scanDevice = new BleScannedDevice(addr, name, rssi);
                 this.scannedDevices.Add(scanDevice);
             }
             AndroidJNI.PopLocalFrame(IntPtr.Zero);
+        }
+
+        private void UpdateScanedServices(string addr,IntPtr scanner,IntPtr getServiceCountByAddrMethod, IntPtr getServiceByAddrAndIdxMethod){
+            List<string> services;
+            if( scanServiceListByDevice.TryGetValue(addr,out services) ){
+                return;
+            }
+
+            int serviceCount = AndroidJNI.CallIntMethod(scanner, getServiceCountByAddrMethod, argBuilder.Build());
+            if(serviceCount == 0) {
+                return; 
+            }
+            services = new List<string>(serviceCount);
+            for (int j = 0;j<serviceCount;++j){
+                argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr)).Append(ArgJvalueBuilder.GenerateJvalue(j));
+                string service = AndroidJNI.CallStringMethod(scanner, getServiceByAddrAndIdxMethod, argBuilder.Build());
+                services.Add(service);
+            }
+            scanServiceListByDevice.Add(addr, services);
         }
 
         public void ConnectRequest(string addr)
@@ -156,6 +185,17 @@ namespace toio.Android
         {
             return this.scannedDevices;
         }
+
+        public List<string> GetDeviceServices(string addr)
+        {
+            List<string> services;
+            if(scanServiceListByDevice.TryGetValue(addr,out services))
+            {
+                return services;
+            }
+            return null;
+        }
+
 
         public List<BleCharacteristicData> GetCharacteristicDatas()
         {

@@ -66,16 +66,16 @@ namespace toio
 #endif
         }
 
-        public static void StartScan(string[] serviceUUIDs, Action<string, string, int, byte[]> discoveredAction = null)
+        public static void StartScan(string[] serviceUUIDs, Action<string, string, int, byte[]> discoveredAction = null, Action<string, List<string>> serviceAction = null)
         {
 #if UNITY_IOS
             toio.BleiOS.StartScan(serviceUUIDs, discoveredAction);
 #elif UNITY_ANDROID_RUNTIME
-            toio.Android.BleAndroid.StartScan(serviceUUIDs, discoveredAction);
+            toio.Android.BleAndroid.StartScan(serviceUUIDs, discoveredAction, serviceAction);
 #elif UNITY_OSX
             toio.BlemacOS.StartScan(serviceUUIDs, discoveredAction);
 #elif UNITY_WIN
-            toio.Windows.BleWin.StartScan(serviceUUIDs, discoveredAction);
+            toio.Windows.BleWin.StartScan(serviceUUIDs, discoveredAction,serviceAction);
 #endif
         }
 

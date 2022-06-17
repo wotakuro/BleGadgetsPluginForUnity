@@ -18,9 +18,13 @@ namespace toio.Android
     {
         private static BleBehaviour behaviour;
         private static BleJavaWrapper javaWrapper;
-        private static Action<string, string, int, byte[]> s_discoveredAction;
+        private static Action<string, string, int, byte[]> s_discoveredAction;        
+        private static Action<string, List<string> > s_scanServiceAction;
+
+
         private static Dictionary<string, BleDiscoverEvents> s_deviceDiscoverEvents = new Dictionary<string, BleDiscoverEvents>();
         private static Dictionary<BleCharastericsKeyInfo, BleDeviceDataEvents> s_deviceDataEvents = new Dictionary<BleCharastericsKeyInfo, BleDeviceDataEvents>();
+        private static Dictionary<string, List<string> > s_scanDeviceServices = new Dictionary<string, List<string> >();
 
         public static void Initialize(Action initializedAction, Action<string> errorAction = null)
         {
@@ -55,12 +59,13 @@ namespace toio.Android
 
 
         public static void StartScan(string[] serviceUUIDs, 
-            Action<string, string, int, byte[]> discoveredAction = null)
+            Action<string, string, int, byte[]> discoveredAction = null,Action<string,List<string>> serviceAction=null)
         {
-
             if (javaWrapper == null) { return; }
             javaWrapper.StartScan(serviceUUIDs);
             s_discoveredAction = discoveredAction;
+            s_scanServiceAction = serviceAction;
+            s_scanDeviceServices.Clear();
         }
 
         public static void StopScan()
@@ -68,6 +73,7 @@ namespace toio.Android
             if (javaWrapper == null){ return; }
             javaWrapper.StopScan();
             s_discoveredAction = null;
+            s_scanServiceAction = null;
         }
 
         public static void ConnectToPeripheral(string identifier, 
@@ -208,7 +214,24 @@ namespace toio.Android
                 var scanDevices = javaWrapper.GetScannedDevices();
                 foreach (var device in scanDevices)
                 {
-                    s_discoveredAction(device.address, device.name, device.rssi, null);
+                    var addr = device.address;
+                    bool flag = false;
+                    if (s_scanDeviceServices.ContainsKey(addr))
+                    {
+                        flag = true;
+                    }
+                    else { 
+                        var services = javaWrapper.GetDeviceServices(addr);
+                        if(services != null)
+                        {
+                            s_scanDeviceServices.Add(addr, services);
+                            flag = true;
+                        }
+                    }
+
+                    if (flag && s_discoveredAction != null) {
+                        s_discoveredAction(device.address, device.name, device.rssi, null);
+                    }
                 }
             }
         }
