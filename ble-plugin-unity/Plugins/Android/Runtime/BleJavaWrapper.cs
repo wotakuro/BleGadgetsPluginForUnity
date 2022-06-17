@@ -169,7 +169,7 @@ namespace toio.Android
             for (int j = 0;j<serviceCount;++j){
                 argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr)).Append(ArgJvalueBuilder.GenerateJvalue(j));
                 string service = AndroidJNI.CallStringMethod(scanner, getServiceByAddrAndIdxMethod, argBuilder.Build());
-                services.Add(service);
+                services.Add(service.ToUpper());
             }
             scanServiceListByDevice.Add(addr, services);
         }
@@ -189,6 +189,7 @@ namespace toio.Android
         public List<string> GetDeviceServices(string addr)
         {
             List<string> services;
+
             if(scanServiceListByDevice.TryGetValue(addr,out services))
             {
                 return services;

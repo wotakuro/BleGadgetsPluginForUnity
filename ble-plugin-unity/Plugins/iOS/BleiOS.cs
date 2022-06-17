@@ -143,6 +143,8 @@ namespace toio
             if (ScanServicesCallFlag.Contains(identifier)) { 
                 return;
             }
+            identifier = identifier.ToUpper();
+            service = service.ToUpper();
 
             List<string> list;
             if(!ScanServicesByDevice.TryGetValue(identifier, out list)){
