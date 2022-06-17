@@ -16,6 +16,9 @@ typedef void (*ErrorActionCallback) (const char *errorCode, const char *errorMes
 typedef void (*InitializedActionCallback) (void);
 typedef void (*FinalizedActionCallback) (void);
 typedef void (*DiscoveredActionCallback) (const char*, const char*, const char*, const char*);
+typedef void (*ScanServiceActionCallback) (const char*, const char*, int,int);
+
+
 typedef void (*ConnectedPeripheralActionCallback) (const char*);
 typedef void (*DiscoveredServiceActionCallback) (const char*, const char*);
 typedef void (*DiscoveredCharacteristicActionCallback) (const char*, const char*, const char*);
@@ -28,6 +31,8 @@ typedef void (*NotifiedCharacteristicActionCallback) (const char*, const char*, 
 ErrorActionCallback errorActionCallback = nil;
 InitializedActionCallback initializedActionCallback = nil;
 DiscoveredActionCallback discoveredActionCallback = nil;
+ScanServiceActionCallback scanServiceActionCallback = nil;
+
 PendingDisconnectedPeripheralActionCallback pendingDisconnectedPeripheralActionCallback = nil;
 NotifiedCharacteristicActionCallback notifiedCharacteristicActionCallback = nil;
 
@@ -80,9 +85,10 @@ void _uiOSDestroyClient(FinalizedActionCallback finalizedCallback) {
     }
 }
 
-void _uiOSStartDeviceScan(const char** filteredUUIDs, DiscoveredActionCallback discoveredCallback, BOOL allowDuplicates) {
+void _uiOSStartDeviceScan(const char** filteredUUIDs, DiscoveredActionCallback discoveredCallback, ScanServiceActionCallback scanServiceCallback, BOOL allowDuplicates) {
     if (_bleModule != nil) {
         discoveredActionCallback = discoveredCallback;
+        scanServiceActionCallback = scanServiceCallback;
 
         if (uuids == nil) {
             uuids = [[NSMutableArray alloc] init];
@@ -226,7 +232,18 @@ void _uiOSUnMonitorCharacteristicForDevice(const char* identifier, const char* s
             const char *name = [[NSString stringWithFormat:@"%@", [item valueForKey:@"name"]] UTF8String];
             const char *rssi = [[NSString stringWithFormat:@"%@", [item valueForKey:@"rssi"]] UTF8String];
             const char *manufacturerData = [[NSString stringWithFormat:@"%@", [item valueForKey:@"manufacturerData"]] UTF8String];
+            
+            
+            if(scanServiceActionCallback != nil){
+                NSArray *serviceUuids = [item valueForKey:@"serviceUUIDs"];
+                int serviceCount = (int)[serviceUuids count];
+                for(int i=0;i<serviceCount;++i){
+                    const char *service = [[NSString stringWithFormat:@"%@", [serviceUuids objectAtIndex:i] ]UTF8String];
+                    scanServiceActionCallback(identifier,service, i , serviceCount);
+                }
+            }
 
+            
             if (discoveredActionCallback != nil) {
                 discoveredActionCallback(identifier, name, rssi, manufacturerData);
             }

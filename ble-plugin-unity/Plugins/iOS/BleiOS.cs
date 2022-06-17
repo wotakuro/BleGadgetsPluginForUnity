@@ -29,7 +29,7 @@ namespace toio
     private static extern void _uiOSDestroyClient(FinalizedActionDelegate finalizedAction);
 
 	[DllImport (DLL_NAME)]
-    private static extern void _uiOSStartDeviceScan(string[] filteredUUIDs, DiscoveredActionDelegate discoveredAction, bool allowDuplicates);
+    private static extern void _uiOSStartDeviceScan(string[] filteredUUIDs, DiscoveredActionDelegate discoveredAction, ScanServiceActionDelegate scanAction,bool allowDuplicates);
 
 	[DllImport (DLL_NAME)]
     private static extern void _uiOSStopDeviceScan();
@@ -123,6 +123,16 @@ namespace toio
 
                 DiscoveredAction(identifier, name, iRssi, data);
             }
+        }
+        //
+        // ScanServiceAction
+        //
+        private delegate void ScanServiceActionDelegate(string identifier, string service, int idx ,int num);
+        [AOT.MonoPInvokeCallback(typeof(ScanServiceActionDelegate))]
+        private static void ScanServiceActionCallback(string identifier, string service, int idx ,int num)
+        {
+            UnityEngine.Debug.Log("ScanServiceActionCallback " + 
+                identifier + ":" + service + "::" + idx + "/" + num);
         }
 
 
@@ -302,7 +312,7 @@ namespace toio
         {
 #if UNITY_IOS
         DiscoveredAction = discoveredAction;
-        _uiOSStartDeviceScan(serviceUUIDs, DiscoveredActionCallback, false);
+        _uiOSStartDeviceScan(serviceUUIDs, DiscoveredActionCallback, ScanServiceActionCallback,false);
 #endif
         }
 
