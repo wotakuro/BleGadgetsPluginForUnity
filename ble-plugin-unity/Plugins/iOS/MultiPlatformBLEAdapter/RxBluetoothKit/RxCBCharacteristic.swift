@@ -56,7 +56,7 @@ class RxCBCharacteristic: RxCharacteristicType {
     }
 
     var service: RxServiceType {
-        return RxCBService(service: characteristic.service)
+        return RxCBService(service: characteristic.service!)
     }
 
     func isEqualTo(characteristic: RxCharacteristicType) -> Bool {

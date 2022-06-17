@@ -40,7 +40,7 @@ class RxCBDescriptor: RxDescriptorType {
     }
 
     var characteristic: RxCharacteristicType {
-        return RxCBCharacteristic(characteristic: descriptor.characteristic)
+        return RxCBCharacteristic(characteristic: descriptor.characteristic!)
     }
 
     var value: Any? {
