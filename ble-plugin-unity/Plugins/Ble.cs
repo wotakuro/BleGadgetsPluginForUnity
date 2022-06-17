@@ -69,7 +69,7 @@ namespace toio
         public static void StartScan(string[] serviceUUIDs, Action<string, string, int, byte[]> discoveredAction = null, Action<string, List<string>> serviceAction = null)
         {
 #if UNITY_IOS
-            toio.BleiOS.StartScan(serviceUUIDs, discoveredAction);
+            toio.BleiOS.StartScan(serviceUUIDs, discoveredAction,serviceAction);
 #elif UNITY_ANDROID_RUNTIME
             toio.Android.BleAndroid.StartScan(serviceUUIDs, discoveredAction, serviceAction);
 #elif UNITY_OSX

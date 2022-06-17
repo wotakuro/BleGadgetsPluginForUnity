@@ -127,12 +127,35 @@ namespace toio
         //
         // ScanServiceAction
         //
+        private static Dictionary<string, List<string>> ScanServicesByDevice = new Dictionary<string, List<string>>();
+        private static HashSet<string> ScanServicesCallFlag = new HashSet<string>();
+
+        private static Action<string, List<string> > ScanServiceAction = null;
         private delegate void ScanServiceActionDelegate(string identifier, string service, int idx ,int num);
         [AOT.MonoPInvokeCallback(typeof(ScanServiceActionDelegate))]
         private static void ScanServiceActionCallback(string identifier, string service, int idx ,int num)
         {
-            UnityEngine.Debug.Log("ScanServiceActionCallback " + 
-                identifier + ":" + service + "::" + idx + "/" + num);
+
+            if (ScanServiceAction == null)
+            {
+                return;
+            }
+            if (ScanServicesCallFlag.Contains(identifier)) { 
+                return;
+            }
+
+            List<string> list;
+            if(!ScanServicesByDevice.TryGetValue(identifier, out list)){
+                list = new List<string>(num);
+                ScanServicesByDevice.Add(identifier, list);
+            }
+            if(idx == 0) { list.Clear(); }
+            list.Add(service);
+            if (idx >= num - 1)
+            {
+                ScanServiceAction(identifier, list);
+                ScanServicesCallFlag.Add(identifier);
+            }
         }
 
 
@@ -308,10 +331,12 @@ namespace toio
         {
         }
 
-        public static void StartScan(string[] serviceUUIDs, Action<string, string, int, byte[]> discoveredAction = null)
+        public static void StartScan(string[] serviceUUIDs, Action<string, string, int, byte[]> discoveredAction = null, Action<string, List<string>>  scanServiceAction =null)
         {
 #if UNITY_IOS
+        ScanServicesCallFlag.Clear();
         DiscoveredAction = discoveredAction;
+        ScanServiceAction = scanServiceAction;
         _uiOSStartDeviceScan(serviceUUIDs, DiscoveredActionCallback, ScanServiceActionCallback,false);
 #endif
         }
