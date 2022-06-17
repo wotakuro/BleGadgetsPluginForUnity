@@ -5,7 +5,6 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
-import android.bluetooth.le.ScanRecord;
 import android.content.Context;
 import android.os.ParcelUuid;
 
@@ -142,18 +141,12 @@ public class BleScannerObj extends ScanCallback{
     public void onScanResult(int callbackType, ScanResult result) {
         super.onScanResult(callbackType,result);
         BluetoothDevice bluetoothDevice = result.getDevice();
-        ScanRecord scanRecord = result.getScanRecord();
-        List<ParcelUuid> uuids = null;
-       if(scanRecord != null){
-           uuids = scanRecord.getServiceUuids();
-        }
         // result.getRssi();
 
         String addr =  bluetoothDevice.getAddress();
         synchronized (this) {
-            String[] services =  getServiceUuidStrings(uuids) ;
-            if(services != null ){
-                this.bleServices.put(addr ,services);
+            if(this.bleServices.containsKey(addr) ){
+                this.bleServices.put(addr , getBluetoothServices(bluetoothDevice) );
             }
             this.bleDevices.put(addr, bluetoothDevice);
             this.bleRssi.put(addr, result.getRssi());
@@ -175,28 +168,9 @@ public class BleScannerObj extends ScanCallback{
             }
         }
     }
-
-    private String[] getServiceUuidStrings( List<ParcelUuid> uuids){
-        String[] ret = new String[ uuids.size() ];
-
-        int idx = 0;
-        for(ParcelUuid uuid : uuids){
-            UUID uuidObj = uuid.getUuid();
-            ret[idx] = uuidObj.toString();
-            ++ idx;
-        }
-        return ret;
-    }
-    /* BluetoothDevice.getUuids() is just use local cache...
-      
+  
     private String[] getBluetoothServices(BluetoothDevice device){
         ParcelUuid[] uuids = device.getUuids();
-        if(uuids == null || uuids.length == 0){
-          
-          boolean result = device.fetchUuidsWithSdp();
-          android.util.Log.d("Unity","fetchUuidsWithSdp " + result);
-          return null;
-        }
         String [] ret = new String[ uuids.length ];
         int idx = 0;
         for(ParcelUuid uuid : uuids){
@@ -206,7 +180,6 @@ public class BleScannerObj extends ScanCallback{
         }
         return ret;
     }
-      */
 
     @Override
     public void onScanFailed(int errorCode) {

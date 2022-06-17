@@ -215,23 +215,19 @@ namespace toio.Android
                 foreach (var device in scanDevices)
                 {
                     var addr = device.address;
-                    bool flag = false;
-                    if (s_scanDeviceServices.ContainsKey(addr))
-                    {
-                        flag = true;
-                    }
-                    else { 
+
+                    //Debug.Log("UpdateScanResult " + addr);
+                    if (!s_scanDeviceServices.ContainsKey(addr)) { 
                         var services = javaWrapper.GetDeviceServices(addr);
                         if(services != null)
                         {
-                            s_scanDeviceServices.Add(addr, services);
-                            flag = true;
+                            if (s_scanDeviceServices != null)
+                            {
+                                s_scanServiceAction(device.address, services);
+                            }
                         }
                     }
-
-                    if (flag && s_discoveredAction != null) {
-                        s_discoveredAction(device.address, device.name, device.rssi, null);
-                    }
+                    s_discoveredAction(device.address, device.name, device.rssi, null);
                 }
             }
         }
@@ -283,7 +279,7 @@ namespace toio.Android
                 BleDeviceDataEvents dataEvt = null;
                 if( !s_deviceDataEvents.TryGetValue(key,out dataEvt))
                 {
-                    Debug.LogError("Not Found key");
+                    Debug.LogError("Not Found key " + key);
                     continue;
                 }
                 if(readData.isNotify)

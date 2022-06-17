@@ -141,13 +141,6 @@ namespace toio.Android
 
                 // 
                 UpdateScanedServices(addr, scanner, getServiceCountByAddrMethod, getServiceByAddrAndIdxMethod);
-                /*
-                int serviceCount = AndroidJNI.CallIntMethod(scanner, getServiceCountByAddrMethod, argBuilder.Build());
-                for(int j = 0;j<serviceCount;++j){
-                    argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr)).Append(ArgJvalueBuilder.GenerateJvalue(j));
-                    string service = AndroidJNI.CallStringMethod(scanner, getServiceByAddrAndIdxMethod, argBuilder.Build());
-                }
-                */
 
                 var scanDevice = new BleScannedDevice(addr, name, rssi);
                 this.scannedDevices.Add(scanDevice);
@@ -156,19 +149,27 @@ namespace toio.Android
         }
 
         private void UpdateScanedServices(string addr,IntPtr scanner,IntPtr getServiceCountByAddrMethod, IntPtr getServiceByAddrAndIdxMethod){
+
             List<string> services;
             if( scanServiceListByDevice.TryGetValue(addr,out services) ){
                 return;
             }
 
+            argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr));
             int serviceCount = AndroidJNI.CallIntMethod(scanner, getServiceCountByAddrMethod, argBuilder.Build());
-            if(serviceCount == 0) {
+
+
+           // Debug.Log("UpdateScanedServices " + addr + "  Count " + serviceCount);
+            if (serviceCount == 0) {
                 return; 
             }
             services = new List<string>(serviceCount);
             for (int j = 0;j<serviceCount;++j){
                 argBuilder.Clear().Append(ArgJvalueBuilder.GenerateJvalue(addr)).Append(ArgJvalueBuilder.GenerateJvalue(j));
                 string service = AndroidJNI.CallStringMethod(scanner, getServiceByAddrAndIdxMethod, argBuilder.Build());
+
+
+                //Debug.Log("UpdateScanedServices "+j +"::" + service);
                 services.Add(service.ToUpper());
             }
             scanServiceListByDevice.Add(addr, services);

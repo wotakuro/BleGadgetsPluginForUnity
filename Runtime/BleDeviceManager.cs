@@ -137,7 +137,7 @@ namespace BleGadget
                 }
                 else
                 {
-                    Debug.LogError("not Found Service " + name);
+                    Debug.LogError("not Found Service " + addr);
                 }
             }
             if (device != null)

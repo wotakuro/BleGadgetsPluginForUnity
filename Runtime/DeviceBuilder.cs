@@ -28,8 +28,13 @@ namespace BleGadget
 
         public static bool IsMatchBuilder(string maiServiceId, List<string> services)
         {
+            if(services == null) { return false; }
             foreach(var service in services)
             {
+                if(service == null)
+                {
+                    continue;
+                }
                 if(maiServiceId.ToUpper() == service.ToUpper())
                 {
                     return true;
